@@ -62,7 +62,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content('mockhttp_tmpurls') );
+        $response->content( make_content('test_files/mockhttp_tmpurls') );
         return RC_OK;
     }
 
@@ -71,7 +71,7 @@ sub test_webserver {
 
         $response->code(404);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content('mockhttp_tmpurls') );
+        $response->content( make_content('test_files/mockhttp_tmpurls') );
         return RC_OK;
     }
 
@@ -80,7 +80,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content('mockhttp_thread') );
+        $response->content( make_content('test_files/mockhttp_thread') );
 
         return RC_OK;
     }
@@ -90,7 +90,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content("$filename_pics[0]") );
+        $response->content( make_content("test_files/$filename_pics[0]") );
 
         return RC_OK;
     }
@@ -100,7 +100,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content("$filename_pics[1]") );
+        $response->content( make_content("test_files/$filename_pics[1]") );
 
         return RC_OK;
     }
@@ -110,7 +110,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content("$filename_pics[2]") );
+        $response->content( make_content("test_files/$filename_pics[2]") );
 
         return RC_OK;
     }
@@ -120,7 +120,7 @@ sub test_webserver {
 
         $response->code(RC_OK);
         $response->push_header("application/x-www-form-urlencoded");
-        $response->content( make_content("$filename_pics[3]") );
+        $response->content( make_content("test_files/$filename_pics[3]") );
 
         return RC_OK;
     }
@@ -227,13 +227,13 @@ subtest 'check geturls' => sub {
     ok( check_pic("$save_dir/$filename_pics[1]"), "file2 ok" );
     ok( check_pic("$save_dir/$filename_pics[2]"), "file3 ok" );
     ok( check_pic("$save_dir/$filename_pics[3]"), "file4 ok" );
-    ok( check_size_file( $filename_pics[0], "$save_dir/$filename_pics[0]" ),
+    ok( check_size_file( "test_files/$filename_pics[0]", "$save_dir/$filename_pics[0]" ),
         "file1 size ok" );
-    ok( check_size_file( $filename_pics[1], "$save_dir/$filename_pics[1]" ),
+    ok( check_size_file( "test_files/$filename_pics[1]", "$save_dir/$filename_pics[1]" ),
         "file2 size ok" );
-    ok( check_size_file( $filename_pics[2], "$save_dir/$filename_pics[2]" ),
+    ok( check_size_file( "test_files/$filename_pics[2]", "$save_dir/$filename_pics[2]" ),
         "file3 size ok" );
-    ok( check_size_file( $filename_pics[3], "$save_dir/$filename_pics[3]" ),
+    ok( check_size_file( "test_files/$filename_pics[3]", "$save_dir/$filename_pics[3]" ),
         "file4 size ok" );
     clean_save_dir($save_dir);
     clean_log('logfile.txt');
