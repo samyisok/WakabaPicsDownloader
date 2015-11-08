@@ -8,23 +8,23 @@ use_ok q{My::WakabaDownloader};
 use Carp;
 
 my @subs =
-  qw(go_to_sleep get_tmp_urls get_url_pics do_download_pics write_to_error_log);
+  qw(make_content go_to_sleep get_tmp_urls get_url_pics do_download_pics write_to_error_log);
 
 can_ok q{My::WakabaDownloader}, @subs;
 
 $My::WakabaDownloader::verbose = 0;
 
-sub make_content {
-    my ($name_file) = @_;
-    open( my $fh, '<', $name_file ) or croak "can't open mockfile";
-    my $file_content;
-    while ( readline($fh) ) {
-        $file_content .= $_;
-    }
-    close $fh;
-    return $file_content;
-
-}
+#sub make_content {
+#    my ($name_file) = @_;
+#    open( my $fh, '<', $name_file ) or croak "can't open mockfile";
+#    my $file_content;
+#    while ( readline($fh) ) {
+#        $file_content .= $_;
+#    }
+#    close $fh;
+#    return $file_content;
+#
+#}
 
 sub clean_log {
     my ($name_file) = @_;
@@ -37,7 +37,7 @@ sub check_size_file {
 }
 
 our @filename_pics =
-  qw (1446408245375.jpg 1446407731740.png 1446408209795.gif 1446408294142.jpg );
+  qw (1446408245375.jpg 1446407731740.png 1446408209795.gif 1446408294142.jpg 123456789000.jpg);
 
 sub test_webserver {
     use POE;
@@ -52,7 +52,8 @@ sub test_webserver {
             "/b/src/$filename_pics[0]" => \&src_pic1,
             "/b/src/$filename_pics[1]" => \&src_pic2,
             "/b/src/$filename_pics[2]" => \&src_pic3,
-            "/b/src/$filename_pics[3]" => \&src_pic4
+            "/b/src/$filename_pics[3]" => \&src_pic4,
+            "/b/src/$filename_pics[4]" => \&src_pic5
         },
         Headers => { Server => 'Simple Perl POE web-server', },
     );
@@ -125,6 +126,16 @@ sub test_webserver {
         return RC_OK;
     }
 
+    sub src_pic5 {
+        my ( $request, $response ) = @_;
+
+        $response->code(RC_OK);
+        $response->push_header("application/x-www-form-urlencoded");
+        $response->content( make_content("test_files/$filename_pics[4]") );
+
+        return RC_OK;
+    }
+
     $poe_kernel->run();
 }
 
@@ -134,7 +145,8 @@ subtest 'check logfile' => sub {
     use My::WakabaDownloader qw(:all);
     write_to_error_log('message1');
     write_to_error_log('message2');
-    my $test_file = 1 if ( -e $name_file );
+    my $test_file = 0;
+    $test_file = 1 if ( -e $name_file );
     ok $test_file, "File Succesful created";
     open( my $fh, '<', $name_file );
     my @array_lines;
@@ -192,7 +204,8 @@ subtest 'check geturls' => sub {
 
     my @expected_pics = (
         "/b/src/$filename_pics[1]", "/b/src/$filename_pics[2]",
-        "/b/src/$filename_pics[0]", "/b/src/$filename_pics[3]"
+        "/b/src/$filename_pics[0]", "/b/src/$filename_pics[3]",
+        "/b/src/$filename_pics[4]"
     );
     my @output_pics_array =
       get_url_pics( $ua, $host_url, $board, qw(/b/res/3742158.html) );
@@ -223,18 +236,43 @@ subtest 'check geturls' => sub {
         my ($file) = @_;
         return 1 if -e $file;
     }
+
     ok( check_pic("$save_dir/$filename_pics[0]"), "file1 ok" );
     ok( check_pic("$save_dir/$filename_pics[1]"), "file2 ok" );
     ok( check_pic("$save_dir/$filename_pics[2]"), "file3 ok" );
     ok( check_pic("$save_dir/$filename_pics[3]"), "file4 ok" );
-    ok( check_size_file( "test_files/$filename_pics[0]", "$save_dir/$filename_pics[0]" ),
-        "file1 size ok" );
-    ok( check_size_file( "test_files/$filename_pics[1]", "$save_dir/$filename_pics[1]" ),
-        "file2 size ok" );
-    ok( check_size_file( "test_files/$filename_pics[2]", "$save_dir/$filename_pics[2]" ),
-        "file3 size ok" );
-    ok( check_size_file( "test_files/$filename_pics[3]", "$save_dir/$filename_pics[3]" ),
-        "file4 size ok" );
+    ok( !defined( check_pic("$save_dir/$filename_pics[4]") ),
+        "file5 must be not found, ok" );
+    ok( check_pic("$save_dir/$My::WakabaDownloader::db_name"),
+        "db file is ok" );
+    ok(
+        check_size_file(
+            "test_files/$filename_pics[0]",
+            "$save_dir/$filename_pics[0]"
+        ),
+        "file1 size ok"
+    );
+    ok(
+        check_size_file(
+            "test_files/$filename_pics[1]",
+            "$save_dir/$filename_pics[1]"
+        ),
+        "file2 size ok"
+    );
+    ok(
+        check_size_file(
+            "test_files/$filename_pics[2]",
+            "$save_dir/$filename_pics[2]"
+        ),
+        "file3 size ok"
+    );
+    ok(
+        check_size_file(
+            "test_files/$filename_pics[3]",
+            "$save_dir/$filename_pics[3]"
+        ),
+        "file4 size ok"
+    );
     clean_save_dir($save_dir);
     clean_log('logfile.txt');
 };
